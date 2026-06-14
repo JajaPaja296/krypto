@@ -10,12 +10,17 @@
 
 3. Validace vstupu:
    Vsechny ciselne vstupy od uzivatele jsou bezpecne osetreny pomoci metody `decimal.TryParse`.
+4. Transakce a historie:
+   Trida `Transaction` uchovava datum, typ operace, castku a zustatek po operaci. Kazdy ucet ma seznam `Historie`. Prikaz `historie [cislo_uctu]` vypise vsechny transakce.
+
+5. Prevod a vyjimky:
+   Prikaz `prevod [z_uctu] [na_uctu] [castka]` prevede penize mezi ucty. Kdyz neni dost penez, program vyhodi vlastni vyjimku `InsufficientFundsException` a zobrazi chybovou hlasku pomoci `try-catch`.
 
 ## Vyuzyti AI pri projektu:
-Umela inteligence byla pouzita pouze jako konzultant. Pomahala mi pochopit teoreticke veci kolem OOP, jako je dedicnost trid a fungovani interface. Samotny kod jsem psal rucne.
-
-## Ovladani
-* list - Zobrazi prehled vsech uctu v systemu
+Umela inteligence byla pouzita jako konzultant kdyz jsem neco nevedel a potreboval vysvetlit. Pomahala mi pochopit teoreticke veci kolem OOP, jako je dedicnost trid a fungovani interface. Samotny kod jsem psal rucne.
+Prompty:jak bude vypadat schema bankovniho systemu. dedicnost trid a fungovani interface jak by vypadalo v kodu udelej na random priklade.
+## Ovladani[
+]()* list - Zobrazi prehled vsech uctu v systemu
 * info [cislo_uctu] - Vypise podrobne informace o vybranem uctu
 * vklad [cislo_uctu] [castka] - Pripise penize na ucet
 * vyber [cislo_uctu] [castka] - Vybere penize (u bezneho uctu s moznosti jit do minusu
