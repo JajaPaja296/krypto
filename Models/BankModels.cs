@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace krypto.Models
 {
@@ -12,6 +13,9 @@ namespace krypto.Models
         public string CisloUctu { get; set; }
         public string Majitel { get; set; }
         public decimal Zustatek { get; set; }
+
+        // seznam vsech transakci na tomto uctu
+        public List<Transaction> Historie = new List<Transaction>();
 
         public Account(string cisloUctu, string majitel, decimal pocatecniVklad)
         {
@@ -30,7 +34,37 @@ namespace krypto.Models
                 return;
             }
             Zustatek += castka;
+            PridatDoHistorie("Vklad", castka);
             Console.WriteLine("Uspesne vlozeno: $" + castka + ". Novy zustatek: $" + Zustatek);
+        }
+
+        // prida zaznam o operaci do historie
+        public void PridatDoHistorie(string typ, decimal castka)
+        {
+            Transaction transakce = new Transaction();
+            transakce.Datum = DateTime.Now;
+            transakce.Typ = typ;
+            transakce.Castka = castka;
+            transakce.ZustatekPo = Zustatek;
+            Historie.Add(transakce);
+        }
+
+        // vypise vsechny transakce uctu
+        public void VypisHistorii()
+        {
+            Console.WriteLine("\n--- HISTORIE UCTU " + CisloUctu + " ---");
+            if (Historie.Count == 0)
+            {
+                Console.WriteLine("Zadne transakce.");
+            }
+            else
+            {
+                foreach (Transaction t in Historie)
+                {
+                    Console.WriteLine(t.Datum + " | " + t.Typ + " | $" + t.Castka + " | zustatek: $" + t.ZustatekPo);
+                }
+            }
+            Console.WriteLine();
         }
     }
 
@@ -50,6 +84,25 @@ namespace krypto.Models
             Console.WriteLine("Sporici ucet majitele " + Majitel + " (Cislo: " + CisloUctu + ")");
             Console.WriteLine("Zustatek: $" + Zustatek + " | Urok: " + (UrokovaSazba * 100) + "%");
             Console.ResetColor();
+        }
+
+        // vybere penize ze sporicího uctu (nelze jit do minusu)
+        public void Vybrat(decimal castka)
+        {
+            if (castka <= 0)
+            {
+                Console.WriteLine("Chyba: Neplatna castka pro vyber!");
+                return;
+            }
+
+            if (Zustatek - castka < 0)
+            {
+                throw new InsufficientFundsException("Na sporicim uctu nemuzete jit do minusu!");
+            }
+
+            Zustatek -= castka;
+            PridatDoHistorie("Vyber", castka);
+            Console.WriteLine("Uspesne vybrano: $" + castka + ". Novy zustatek: $" + Zustatek);
         }
     }
 
@@ -81,15 +134,29 @@ namespace krypto.Models
 
             if (Zustatek - castka < -LimitPrecerpani)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Chyba: Nedostatek financi! Prekrocili byste limit kontokorentu.");
-                Console.ResetColor();
+                throw new InsufficientFundsException("Prekrocili byste limit kontokorentu.");
             }
-            else
-            {
-                Zustatek -= castka;
-                Console.WriteLine("Uspesne vybrano: $" + castka + ". Novy zustatek: $" + Zustatek);
-            }
+
+            Zustatek -= castka;
+            PridatDoHistorie("Vyber", castka);
+            Console.WriteLine("Uspesne vybrano: $" + castka + ". Novy zustatek: $" + Zustatek);
+        }
+    }
+
+    // uchovava informace o jedne bankovni operaci
+    public class Transaction
+    {
+        public DateTime Datum { get; set; }
+        public string Typ { get; set; }
+        public decimal Castka { get; set; }
+        public decimal ZustatekPo { get; set; }
+    }
+
+    // vlastni vyjimka - hodi se kdyz neni dost penez na uctu
+    public class InsufficientFundsException : Exception
+    {
+        public InsufficientFundsException(string zprava) : base(zprava)
+        {
         }
     }
 }
